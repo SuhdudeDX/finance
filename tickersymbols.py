@@ -1,3 +1,4 @@
 COMPANY = [
-    'TSLA', 'FB', 'GS', 'TWTR'
+    'TSLA', 'FB', 'GS', 'TWTR',
+    'GOOG', 'AMZN', 'MSFT','AAPL'
 ]
