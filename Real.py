@@ -26,12 +26,12 @@ Label(text='Calculation Days', padx=10, font=100).grid(row=1, sticky = W)
 mainroot = Entry(width=15, font=30, textvariable=days)
 mainroot.grid(row=1, column=1)
 
-start_year = IntVar()
+start_year = StringVar()
 Label(text='Start Year', padx=10, font=100).grid(row=2, sticky = W)
 mainroot = Entry(width=15, font=30, textvariable=start_year)
 mainroot.grid(row=2, column=1)
 
-end_year = IntVar()
+end_year = StringVar()
 Label(text='End Year', padx=10, font=100).grid(row=3, sticky = W)
 mainroot = Entry(width=15, font=30, textvariable=end_year)
 mainroot.grid(row=3, column=1)
@@ -41,9 +41,27 @@ def enter():
     prediction_days = days.get()
     starto = start_year.get()
     endo = end_year.get()
+    starto_split = starto.split(', ')
+    endo_split = endo.split(', ')
+    for i in range(3):
+        if i == 0:
+            start_year1 = starto_split[0]
+        elif i == 1:
+            start_month1 = starto_split[1]
+        else:
+            start_day1 = starto_split[2]
+    for i in range(3):
+        if i == 0:
+            end_year1 = endo_split[0]
+        elif i == 1:
+            end_month1 = endo_split[1]
+        else:
+            end_day1 = endo_split[2]
+    print(dt.datetime.now())
+
     try:
-        start = dt.datetime(starto, 1, 1)
-        end = dt.datetime(endo, 1, 1)
+        start = dt.datetime(int(start_year1), int(start_month1), int(start_day1))
+        end = dt.datetime(int(end_year1), int(end_month1), int(end_day1))
 
         data = web.DataReader(company, 'yahoo', start, end)
 
@@ -78,14 +96,14 @@ def enter():
 
         '''Test the model accuracy on existing data'''
 
-        #Load Test Data/test the data which the program has never seen before
-        test_start=dt.datetime(endo, 1, 1)
+        #Load Test Data
+        test_start=dt.datetime(int(end_year1), int(end_month1), int(end_day1))
         test_end=dt.datetime.now()
 
         test_data = web.DataReader(company, 'yahoo', test_start, test_end)
         actual_prices=test_data['Close'].values
 
-        total_dataset=pd.concat((data['Close'], test_data['Close']), axis=0)
+        total_dataset=pd.concat((data['Close'], test_data['Close']), axis=0)#not scaled
 
         model_inputs=total_dataset[len(total_dataset)-len(test_data)-prediction_days:].values#model sees input
         model_inputs = model_inputs.reshape(-1, 1)
@@ -108,7 +126,7 @@ def enter():
         plt.plot(predicted_prices, color="green", label=f"Predicted {company} Price")
         plt.title(f"{company} Share Price")
         plt.xlabel("Time")
-        plt.ylabel(f"{company} Share Price")
+        plt.ylabel(f"{company} Share Price in USD")
         plt.legend()
         plt.show()
 
@@ -121,8 +139,8 @@ def enter():
         prediction = scaler.inverse_transform(prediction)
         messagebox.showinfo('Prediction', f'The Prediction Price for tomorrow is {prediction}')
 
-    except ValueError:
-        messagebox.showerror("Error","Please Try Other Years")
+    except:
+        messagebox.showerror("Error","Input Error, Try again")
 
 
 Button(text="ENTER", font = 30, width = 15, command = enter).grid(row = 5, column = 1, sticky = W)
